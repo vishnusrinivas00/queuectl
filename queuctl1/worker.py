@@ -7,6 +7,7 @@ import os
 import signal
 import subprocess
 import time
+from datetime import datetime
 from typing import Optional
 
 from .storage import (
@@ -51,13 +52,34 @@ def run_worker(db_path: Optional[str] = None, heartbeat_sec: int = 2):
 
         # actually run the command (shell=True because assignment uses echo/sleep)
         try:
+            # record start time
+            start_time = datetime.utcnow()
             run_cmd = subprocess.run(job["command"], shell=True, capture_output=True, text=True)
+            end_time = datetime.utcnow()
+            duration_ms = int((end_time - start_time).total_seconds() * 1000)
+
+            # update timing in DB
+            db.execute(
+                "UPDATE jobs SET started_at=?, duration_ms=?, updated_at=? WHERE id=?",
+                (start_time.isoformat(), duration_ms, end_time.isoformat(), job["id"])
+            )
+            # continue with existing success/failure logic
             if run_cmd.returncode == 0:
                 update_job_success(db, job["id"])
             else:
-                base = int(get_config(db, "backoff_base") or 2)     # tweakable via CLI
-                err = (run_cmd.stderr or run_cmd.stdout or "").strip()[:500]
-                update_job_failure(db, job["id"], job["attempts"], job["max_retries"], base, err or f"exit={run_cmd.returncode}")
+                base = int(get_config(db, "backoff_base") or 2)
+                err = (run_cmd.stderr or run_cmd.stdout or "").strip()[:300]
+                update_job_failure(
+                    db,
+                    job["id"],
+                    job["attempts"],
+                    job["max_retries"],
+                    base,
+                    err or f"exit={run_cmd.returncode}"
+                )
+                if job["attempts"] + 1 >= job["max_retries"]:
+                    move_to_dlq(db, job["id"], err)
+
         except Exception as boom:
             # unexpected execution error
             base = int(get_config(db, "backoff_base") or 2)

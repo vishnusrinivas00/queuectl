@@ -63,6 +63,26 @@ def _cmd_status(args):
     db = connect(args.db)
     print(json.dumps(status(db), indent=2))
 
+def _cmd_metrics(args):
+    """Show overall job performance metrics."""
+    from .storage import connect, init
+    import json
+
+    init(args.db)
+    db = connect(args.db)
+
+    row = db.execute("""
+    SELECT
+        (SELECT COUNT(*) FROM jobs) + (SELECT COUNT(*) FROM dlq) AS total,
+        (SELECT COUNT(*) FROM jobs WHERE state='completed') AS success,
+        (SELECT COUNT(*) FROM dlq) AS failed,
+        ROUND((SELECT AVG(duration_ms) FROM jobs), 2) AS avg_ms
+""").fetchone()
+
+    keys = ["total", "success", "failed", "avg_ms"]
+    metrics = dict(zip(keys, row))
+    print(json.dumps(metrics, indent=2))
+
 
 def _cmd_list(args):
     init(args.db)
@@ -121,6 +141,9 @@ def _make_parser():
 
     sp2 = sub.add_parser("status", help="Show summary of job states & active workers")
     sp2.set_defaults(func=_cmd_status)
+
+    mp = sub.add_parser("metrics", help="Show aggregated job execution metrics")
+    mp.set_defaults(func=_cmd_metrics)
 
     sp3 = sub.add_parser("list", help="List jobs (optionally by state)")
     sp3.add_argument("--state", choices=["pending","processing","completed","failed"], help="Filter by state")

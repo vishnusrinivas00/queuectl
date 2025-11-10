@@ -26,6 +26,8 @@ SCHEMA_STMTS = [
         updated_at TEXT NOT NULL,
         next_attempt_at TEXT,
         last_error TEXT,
+        started_at TEXT,
+        duration_ms INTEGER
     )""",
     """CREATE TABLE IF NOT EXISTS dlq (
         id TEXT PRIMARY KEY,
