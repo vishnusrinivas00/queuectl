@@ -1,0 +1,14 @@
+# virtual environment
+.venv/
+
+# database files
+queuectl.db*
+*.sqlite
+
+# cache
+__pycache__/
+*.pyc
+*.pyo
+
+# egg info
+*.egg-info/

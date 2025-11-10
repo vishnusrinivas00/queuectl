@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "queuectl"
+version = "0.1.0"
+description = "CLI-based background job queue with retries and a DLQ"
+authors = [{name="Vishnu Srinivas"}]
+requires-python = ">=3.10"
+
+[project.scripts]
+queuectl = "queuctl1.cli:main"
+
