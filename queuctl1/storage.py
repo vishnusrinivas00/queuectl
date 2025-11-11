@@ -27,7 +27,8 @@ SCHEMA_STMTS = [
         next_attempt_at TEXT,
         last_error TEXT,
         started_at TEXT,
-        duration_ms INTEGER
+        duration_ms INTEGER,
+        timeout_seconds INTEGER DEFAULT 10
     )""",
     """CREATE TABLE IF NOT EXISTS dlq (
         id TEXT PRIMARY KEY,
@@ -94,7 +95,7 @@ def set_config(db: sqlite3.Connection, key: str, value: str) -> None:
 
 def enqueue(db: sqlite3.Connection, job: Dict) -> None:
     now = _stamp()
-    # if not provided, pick default from config   (small convenience)
+    # if not provided, pick default from config   (small)
     max_retries = job.get("max_retries")
     if max_retries is None:
         max_retries = int(get_config(db, "default_max_retries") or 3)
@@ -186,7 +187,7 @@ def update_job_failure(
             )
         return "dead"
 
-    # schedule next run (keep it simple for assignment)
+    # schedule next run (kept it simple for assignment)
     delay_secs = backoff_base ** attempts
     next_ts = int(time.time() + delay_secs)
     next_iso = datetime.fromtimestamp(next_ts, tz=timezone.utc).replace(microsecond=0)\

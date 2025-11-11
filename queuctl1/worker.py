@@ -7,6 +7,7 @@ import os
 import signal
 import subprocess
 import time
+from subprocess import TimeoutExpired
 from datetime import datetime
 from typing import Optional
 
@@ -54,7 +55,36 @@ def run_worker(db_path: Optional[str] = None, heartbeat_sec: int = 2):
         try:
             # record start time
             start_time = datetime.utcnow()
-            run_cmd = subprocess.run(job["command"], shell=True, capture_output=True, text=True)
+            #timeout implementation
+            timeout_sec = job.get("timeout_seconds", 10) or 10  # default 10 seconds
+            try:
+                run_cmd = subprocess.run(
+                    job["command"],
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_sec
+                )
+            except TimeoutExpired:
+                end_time = datetime.utcnow()
+                duration_ms = int((end_time - start_time).total_seconds() * 1000)
+                db.execute(
+                    "UPDATE jobs SET started_at=?, duration_ms=?, updated_at=? WHERE id=?",
+                    (start_time.isoformat(), duration_ms, end_time.isoformat(), job["id"])
+                )
+                base = int(get_config(db, "backoff_base") or 2)
+                update_job_failure(
+                    db,
+                    job["id"],
+                    job["attempts"],
+                    job["max_retries"],
+                    base,
+                    f"timeout after {timeout_sec}s"
+                )
+                if job["attempts"] + 1 >= job["max_retries"]:
+                    move_to_dlq(db, job["id"], f"timeout after {timeout_sec}s")
+                continue 
+
             end_time = datetime.utcnow()
             duration_ms = int((end_time - start_time).total_seconds() * 1000)
 
