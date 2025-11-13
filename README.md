@@ -218,14 +218,14 @@ queuectl dlq list
 
 ---
 
-# ** Demo Video**
+# Demo Video
 
 (https://drive.google.com/file/d/1Jx6p_94qOCyTi6Sg4us3ZenlMbe3HngF/view?usp=sharing)
 to watch the demonstration
 
 ---
 
-# ** Author**
+# Author
 
 **Vishnu Srinivas**
 GitHub: [https://github.com/vishnusrinivas00](https://github.com/vishnusrinivas00)
