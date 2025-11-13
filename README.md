@@ -7,7 +7,7 @@ I designed the system to be simple, modular, and easy to test while still coveri
 
 ---
 
-# **1️⃣ Setup Instructions**
+# **1️) Setup Instructions**
 
 ### **Clone the repository**
 
@@ -37,7 +37,7 @@ queuectl --help
 
 ---
 
-# **2️⃣ Usage Examples**
+# **2️) Usage Examples**
 
 ### **Enqueue a job**
 
@@ -102,7 +102,7 @@ queuectl enqueue "{\"id\":\"slowjob\",\"command\":\"powershell -Command Start-Sl
 
 ---
 
-# **3️⃣ Architecture Overview**
+# **3️) Architecture Overview**
 
 ## **Job Lifecycle**
 
@@ -156,7 +156,7 @@ SQLite ensures persistence even when everything shuts down.
 
 ---
 
-# **4️⃣ Assumptions & Trade-offs**
+# **4️) Assumptions & Trade-offs**
 
 ### **Assumptions**
 
@@ -175,7 +175,7 @@ These choices keep the system achievable and maintainable within assignment cons
 
 ---
 
-# **5️⃣ Testing Instructions**
+# **5️) Testing Instructions**
 
 ### **1. Successful job**
 
@@ -218,13 +218,13 @@ queuectl dlq list
 
 ---
 
-# **🎥 Demo Video**
+# ** Demo Video**
 
 *(To be added after recording.)*
 
 ---
 
-# **✍️ Author**
+# ** Author**
 
 **Vishnu Srinivas**
 GitHub: [https://github.com/vishnusrinivas00](https://github.com/vishnusrinivas00)
