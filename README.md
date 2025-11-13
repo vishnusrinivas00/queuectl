@@ -220,7 +220,8 @@ queuectl dlq list
 
 # ** Demo Video**
 
-*(To be added after recording.)*
+(https://drive.google.com/file/d/1Jx6p_94qOCyTi6Sg4us3ZenlMbe3HngF/view?usp=sharing)
+to watch the demonstration
 
 ---
 
